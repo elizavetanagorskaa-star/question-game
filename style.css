@@ -31,6 +31,106 @@ body {
 
 body {
     min-height: 100vh;
+
+    position: relative;
+}
+
+
+/* =========================
+   ЖУРНАЛЬНЫЕ ЗВЁЗДОЧКИ
+   ========================= */
+
+body::before {
+    content:
+        "✦       ✧             ✦"
+        "          ☆"
+        "    ✧              ✦"
+        "              ✧"
+        "  ✦                  ☆"
+        "          ✧"
+        "                    ✦"
+        "       ☆"
+        "             ✦";
+
+    position: fixed;
+
+    top: -10px;
+    left: -5px;
+
+    width: 110%;
+    height: 110%;
+
+    z-index: 0;
+
+    color: rgba(255, 255, 255, 0.72);
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 15px;
+
+    line-height: 90px;
+
+    letter-spacing: 8px;
+
+    white-space: pre-wrap;
+
+    pointer-events: none;
+
+    transform: rotate(-4deg);
+
+    text-shadow:
+        0 1px 5px rgba(255, 255, 255, 0.45);
+}
+
+
+/* Вторая россыпь звёзд */
+
+body::after {
+    content:
+        "☆          ✦"
+        "              ✧"
+        "   ✦                    ☆"
+        "           ✧"
+        "                      ✦"
+        "       ☆"
+        "              ✦"
+        "   ✧"
+        "                    ☆";
+
+    position: fixed;
+
+    right: -30px;
+    bottom: -20px;
+
+    width: 110%;
+    height: 110%;
+
+    z-index: 0;
+
+    color: rgba(255, 255, 255, 0.42);
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 11px;
+
+    line-height: 105px;
+
+    letter-spacing: 12px;
+
+    white-space: pre-wrap;
+
+    pointer-events: none;
+
+    transform: rotate(5deg);
+
+    text-shadow:
+        0 1px 6px rgba(255, 255, 255, 0.35);
 }
 
 
@@ -40,6 +140,8 @@ body {
 
 #app {
     position: relative;
+
+    z-index: 1;
 
     width: 100%;
     min-height: 100vh;
@@ -110,7 +212,9 @@ body {
 }
 
 
-/* разные кусочки бумаги */
+/* =========================
+   РАЗНЫЕ КУСОЧКИ БУМАГИ
+   ========================= */
 
 .letter-1 {
     background: #f6b8c9;
@@ -471,4 +575,5 @@ p {
 
         font-size: 17px;
     }
+
 }
