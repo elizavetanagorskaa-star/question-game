@@ -22,10 +22,14 @@ let questions = [];
 let currentQuestions = [];
 let currentIndex = 0;
 
+let startX = 0;
+let currentX = 0;
+let dragging = false;
 
-// =========================
+
+// =====================================
 // ЗАГРУЗКА ВОПРОСОВ
-// =========================
+// =====================================
 
 async function loadQuestions() {
 
@@ -42,54 +46,95 @@ async function loadQuestions() {
     } catch (error) {
 
         console.error(
-            "Ошибка загрузки вопросов:",
+            "Не удалось загрузить вопросы:",
             error
         );
 
+        categories.innerHTML = `
+            <p>
+                Не удалось загрузить вопросы.
+                Попробуйте обновить приложение.
+            </p>
+        `;
     }
 }
 
 
-// =========================
-// СОЗДАНИЕ ТЕМ
-// =========================
+// =====================================
+// СОЗДАЁМ КАТЕГОРИИ
+// =====================================
 
 function createCategories() {
 
-    const categoryNames =
-        [...new Set(
-            questions.map(
-                question => question.category
-            )
-        )];
-
     categories.innerHTML = "";
+
+    const categoryNames = [
+        "🫂 Для друзей",
+        "🫶🏻 Давай сблизимся?",
+        "☕️ Глубокие",
+        "😸 Смешные",
+        "🍷 18+"
+    ];
+
 
     categoryNames.forEach(category => {
 
-        const button =
-            document.createElement("button");
-
-        button.className =
-            "category-button";
-
-        button.textContent =
-            category;
-
-        button.addEventListener(
-            "click",
-            () => startGame(category)
-        );
-
-        categories.appendChild(button);
+        createCategoryButton(category);
 
     });
+
+
+    // Все темы
+
+    createCategoryButton(
+        "🦦 Все темы",
+        true
+    );
 }
 
 
-// =========================
+// =====================================
+// КНОПКА КАТЕГОРИИ
+// =====================================
+
+function createCategoryButton(
+    category,
+    allTopics = false
+) {
+
+    const button =
+        document.createElement("button");
+
+    button.className =
+        "category-button";
+
+    button.textContent =
+        category;
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            if (allTopics) {
+
+                startAllTopics();
+
+            } else {
+
+                startGame(category);
+
+            }
+
+        }
+    );
+
+    categories.appendChild(button);
+}
+
+
+// =====================================
 // ПЕРЕМЕШИВАНИЕ
-// =========================
+// =====================================
 
 function shuffle(array) {
 
@@ -119,9 +164,9 @@ function shuffle(array) {
 }
 
 
-// =========================
-// НАЧАЛО ИГРЫ
-// =========================
+// =====================================
+// ИГРА ПО КАТЕГОРИИ
+// =====================================
 
 function startGame(category) {
 
@@ -135,6 +180,36 @@ function startGame(category) {
 
     currentIndex = 0;
 
+    openGame();
+
+    showCards();
+
+}
+
+
+// =====================================
+// ВСЕ ТЕМЫ
+// =====================================
+
+function startAllTopics() {
+
+    currentQuestions =
+        shuffle(questions);
+
+    currentIndex = 0;
+
+    openGame();
+
+    showCards();
+}
+
+
+// =====================================
+// ОТКРЫВАЕМ ЭКРАН ИГРЫ
+// =====================================
+
+function openGame() {
+
     categoriesScreen.classList.add(
         "hidden"
     );
@@ -142,16 +217,14 @@ function startGame(category) {
     gameScreen.classList.remove(
         "hidden"
     );
-
-    showCard();
 }
 
 
-// =========================
-// ПОКАЗ КАРТОЧКИ
-// =========================
+// =====================================
+// ПОКАЗЫВАЕМ ДВЕ КАРТОЧКИ
+// =====================================
 
-function showCard() {
+function showCards() {
 
     cardsContainer.innerHTML = "";
 
@@ -165,8 +238,57 @@ function showCard() {
         return;
     }
 
-    const question =
-        currentQuestions[currentIndex];
+
+    // Следующая карточка
+
+    if (
+        currentIndex + 1 <
+        currentQuestions.length
+    ) {
+
+        const nextCard =
+            createCard(
+                currentQuestions[
+                    currentIndex + 1
+                ]
+            );
+
+        nextCard.classList.add(
+            "next-card"
+        );
+
+        cardsContainer.appendChild(
+            nextCard
+        );
+    }
+
+
+    // Текущая карточка
+
+    const currentCard =
+        createCard(
+            currentQuestions[
+                currentIndex
+            ]
+        );
+
+    currentCard.classList.add(
+        "current-card"
+    );
+
+    cardsContainer.appendChild(
+        currentCard
+    );
+
+    addSwipe(currentCard);
+}
+
+
+// =====================================
+// СОЗДАЁМ КАРТОЧКУ
+// =====================================
+
+function createCard(question) {
 
     const card =
         document.createElement("div");
@@ -177,26 +299,15 @@ function showCard() {
     card.textContent =
         question.question;
 
-    cardsContainer.appendChild(card);
-
-    addSwipe(card);
+    return card;
 }
 
 
-// =========================
+// =====================================
 // СВАЙП
-// =========================
+// =====================================
 
 function addSwipe(card) {
-
-    let startX = 0;
-    let currentX = 0;
-
-    let startY = 0;
-    let currentY = 0;
-
-    let dragging = false;
-
 
     card.addEventListener(
         "touchstart",
@@ -205,11 +316,7 @@ function addSwipe(card) {
             startX =
                 event.touches[0].clientX;
 
-            startY =
-                event.touches[0].clientY;
-
             currentX = startX;
-            currentY = startY;
 
             dragging = true;
 
@@ -229,33 +336,46 @@ function addSwipe(card) {
             currentX =
                 event.touches[0].clientX;
 
-            currentY =
-                event.touches[0].clientY;
-
-            const differenceX =
+            const difference =
                 currentX - startX;
 
-            const differenceY =
-                currentY - startY;
-
-
-            // Если движение больше вертикальное,
-            // не двигаем карточку по горизонтали
-
-            if (
-                Math.abs(differenceY) >
-                Math.abs(differenceX)
-            ) {
-                return;
-            }
-
-
             const rotation =
-                differenceX / 20;
+                difference / 18;
+
 
             card.style.transform =
-                `translateX(${differenceX}px)
+                `translateX(${difference}px)
                  rotate(${rotation}deg)`;
+
+
+            // Небольшое увеличение следующей карточки
+
+            const nextCard =
+                document.querySelector(
+                    ".next-card"
+                );
+
+            if (nextCard) {
+
+                const progress =
+                    Math.min(
+                        Math.abs(difference) /
+                        250,
+                        1
+                    );
+
+                const scale =
+                    0.94 +
+                    progress * 0.06;
+
+                const move =
+                    15 -
+                    progress * 15;
+
+                nextCard.style.transform =
+                    `scale(${scale})
+                     translateY(${move}px)`;
+            }
 
         },
         { passive: true }
@@ -270,7 +390,7 @@ function addSwipe(card) {
 
             dragging = false;
 
-            const differenceX =
+            const difference =
                 currentX - startX;
 
 
@@ -278,20 +398,23 @@ function addSwipe(card) {
                 "transform 0.35s ease, opacity 0.35s ease";
 
 
-            // Свайп достаточно сильный
+            // =================================
+            // СИЛЬНЫЙ СВАЙП
+            // =================================
+
             if (
-                Math.abs(differenceX) > 100
+                Math.abs(difference) > 100
             ) {
 
                 const direction =
-                    differenceX > 0
+                    difference > 0
                         ? 1
                         : -1;
 
 
                 card.style.transform =
-                    `translateX(${direction * 600}px)
-                     rotate(${direction * 30}deg)`;
+                    `translateX(${direction * 700}px)
+                     rotate(${direction * 35}deg)`;
 
                 card.style.opacity = "0";
 
@@ -301,20 +424,37 @@ function addSwipe(card) {
 
                         currentIndex++;
 
-                        showCard();
+                        showCards();
 
                     },
-                    250
+                    300
                 );
 
 
-            } else {
+            }
 
-                // Если свайп слабый —
-                // возвращаем карточку
+            // =================================
+            // СЛАБЫЙ СВАЙП
+            // =================================
+
+            else {
 
                 card.style.transform =
                     "translateX(0) rotate(0)";
+
+
+                const nextCard =
+                    document.querySelector(
+                        ".next-card"
+                    );
+
+                if (nextCard) {
+
+                    nextCard.style.transform =
+                        "scale(0.94) translateY(15px)";
+
+                }
+
             }
 
         }
@@ -322,9 +462,9 @@ function addSwipe(card) {
 }
 
 
-// =========================
-// КОНЕЦ ВОПРОСОВ
-// =========================
+// =====================================
+// КОНЕЦ ИГРЫ
+// =====================================
 
 function endGame() {
 
@@ -337,7 +477,7 @@ function endGame() {
         "question-card";
 
     message.textContent =
-        "Вопросы закончились 💕";
+        "Вопросы закончились 🫶🏻";
 
     cardsContainer.appendChild(
         message
@@ -345,9 +485,9 @@ function endGame() {
 }
 
 
-// =========================
-// НАЗАД
-// =========================
+// =====================================
+// КНОПКА НАЗАД
+// =====================================
 
 backButton.addEventListener(
     "click",
@@ -365,8 +505,8 @@ backButton.addEventListener(
 );
 
 
-// =========================
+// =====================================
 // ЗАПУСК
-// =========================
+// =====================================
 
 loadQuestions();
