@@ -1,7 +1,16 @@
 body {
-    background: red !important;
-}
+    min-height: 100vh;
 
+    background:
+        linear-gradient(
+            135deg,
+            #f8c9dc 0%,
+            #f9d9d0 45%,
+            #fff0bd 100%
+        );
+
+    overflow: hidden;
+}
 * {
     color: blue !important;
 }body {
